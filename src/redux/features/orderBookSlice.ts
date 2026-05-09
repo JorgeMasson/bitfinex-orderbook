@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { BookLevel, OrderBookInitialState } from "../../models";
+import { OrderBookInitialState, SetBookPayload } from "../../models";
 import { Precision, ViewMode } from "../../utils";
 
 const initialState: OrderBookInitialState = {
@@ -28,10 +28,7 @@ const orderBookSlice = createSlice({
     setViewMode: (state, action: PayloadAction<ViewMode>) => {
       state.viewMode = action.payload;
     },
-    setBook: (
-      state,
-      action: PayloadAction<{ bids: BookLevel[]; asks: BookLevel[] }>
-    ) => {
+    setBook: (state, action: PayloadAction<SetBookPayload>) => {
       state.bids = action.payload.bids;
       state.asks = action.payload.asks;
       state.spread =

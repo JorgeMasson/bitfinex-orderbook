@@ -13,7 +13,7 @@ import {
   setBook,
   setConnected,
   setPrecision,
-} from "./orderBookSlice";
+} from "../features/orderBookSlice";
 import { BookLevel } from "../../models";
 import { OrderBookSocketEvent, Precision } from "../../utils";
 
