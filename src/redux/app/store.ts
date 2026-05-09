@@ -7,7 +7,7 @@ const sagaMiddleware = createSagaMiddleware();
 
 export const store = configureStore({
   reducer: {
-    orderBook: orderBookReducer,
+    orderBookSlice: orderBookReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
