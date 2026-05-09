@@ -15,7 +15,7 @@ import {
   setPrecision,
 } from "../features/orderBookSlice";
 import { BookLevel } from "../../models";
-import { OrderBookSocketEvent, Precision } from "../../utils";
+import { OrderBookSocketEvent, Precision, UPDATE_INTERVAL } from "../../utils";
 
 const WS_URL = "wss://api-pub.bitfinex.com/ws/2";
 
@@ -49,6 +49,33 @@ const createSocketChannel = (precision: Precision) => {
     const ws = new WebSocket(WS_URL);
     const book = new Map<number, BookLevel>();
 
+    let lastEmit = 0;
+    let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    const emitBook = () => {
+      const now = Date.now();
+      const elapsed = now - lastEmit;
+
+      const send = () => {
+        lastEmit = Date.now();
+        pendingTimeout = null;
+
+        emit({
+          type: "book",
+          payload: normalizeBook(book),
+        });
+      };
+
+      if (elapsed >= UPDATE_INTERVAL) {
+        send();
+        return;
+      }
+
+      if (!pendingTimeout) {
+        pendingTimeout = setTimeout(send, UPDATE_INTERVAL - elapsed);
+      }
+    };
+
     ws.onopen = () => {
       emit({ type: "connected" });
 
@@ -58,7 +85,7 @@ const createSocketChannel = (precision: Precision) => {
           channel: "book",
           symbol: "tBTCUSD",
           prec: precision,
-          freq: "F0",
+          freq: "F1",
           len: "25",
         })
       );
@@ -88,10 +115,7 @@ const createSocketChannel = (precision: Precision) => {
         }
       }
 
-      emit({
-        type: "book",
-        payload: normalizeBook(book),
-      });
+      emitBook();
     };
 
     ws.onerror = () => {
@@ -102,7 +126,13 @@ const createSocketChannel = (precision: Precision) => {
       emit({ type: "disconnected" });
     };
 
-    return () => ws.close();
+    return () => {
+      if (pendingTimeout) {
+        clearTimeout(pendingTimeout);
+      }
+
+      ws.close();
+    };
   });
 };
 
@@ -111,7 +141,7 @@ function* watchOrderBookSocket(): Generator<Effect, void, any> {
     yield take(connectOrderBook.type);
 
     const precision: Precision = yield select(
-      (state) => state.orderBook.precision
+      (state) => state.orderBookSlice.precision
     );
 
     const channel: EventChannel<OrderBookSocketEvent> = yield call(
