@@ -2,7 +2,7 @@
 
 This project implements a real-time Order Book similar to Bitfinex Trading UI.
 
-## 🚀 Features
+## Features
 
 - Real-time order book via WebSocket (Bitfinex API)
 - Redux Toolkit + Redux Saga
@@ -19,14 +19,14 @@ This project implements a real-time Order Book similar to Bitfinex Trading UI.
 - Redux Saga
 - WebSocket (Bitfinex v2 API)
 
-## ⚡ Performance Considerations
+## Performance Considerations
 
 - Throttled UI updates (150ms)
 - FlatList optimization
 - Memoized components
 - Avoided unnecessary re-renders
 
-## ▶️ Run project
+## Run project
 
 ```bash
 npm install
